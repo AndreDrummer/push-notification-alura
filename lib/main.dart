@@ -50,6 +50,12 @@ Future<void> startPushNotificationHandler(FirebaseMessaging messaging) async {
       }
     },
   );
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBaclgroundHandler);
+}
+
+Future<void> _firebaseMessagingBaclgroundHandler(RemoteMessage message) async {
+  debugPrint('BACKGROUND MESSAGE');
 }
 
 void _setPushToken(String? token) async {
