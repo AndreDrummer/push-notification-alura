@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
 class CardWidget extends StatelessWidget {
-  String imageURL;
-  String title;
-  String description;
+  final String description;
+  final String imageURL;
+  final String title;
 
-  CardWidget({
+  const CardWidget({
+    required this.description,
     required this.imageURL,
     required this.title,
-    required this.description
   });
 
   @override
@@ -16,7 +16,6 @@ class CardWidget extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(10.0),
       child: Column(
-
         children: <Widget>[
           Card(
             child: Container(

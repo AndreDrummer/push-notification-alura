@@ -9,6 +9,8 @@ import 'package:meetups/screens/events_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+final navigatiorKey = GlobalKey<NavigatorState>();
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -38,7 +40,9 @@ Future<void> main() async {
 }
 
 Future<void> startPushNotificationHandler(FirebaseMessaging messaging) async {
-  String? token = await messaging.getToken();
+  String? token = await messaging.getToken(
+      vapidKey:
+          'BOptq9FbWip1gwV6l3xAK5JEdm-mVPCs1FGwQWcTfu0U_UUHYY6XR6Hi54xoUDBDVonmr9zpwgleTEV6E7JzPOs');
   debugPrint('Token $token');
   _setPushToken(token);
 
@@ -46,16 +50,26 @@ Future<void> startPushNotificationHandler(FirebaseMessaging messaging) async {
     (RemoteMessage message) {
       debugPrint('Dados da mensagem: ${message.data}');
       if (message.notification != null) {
-        debugPrint('Dados da notiicaçaoß: ${message.notification!.title}');
+        debugPrint('Dados da notiicaçao: ${message.notification!.title}');
       }
     },
   );
 
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBaclgroundHandler);
+  // Background
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // Checando de o aplicativo foi aberto pela notificação -> Terminated
+  var notification = await FirebaseMessaging.instance.getInitialMessage();
+  if (notification != null && notification.data['message'].length > 0) {
+    debugPrint('${notification.data['message']}');
+    ScaffoldMessenger.of(navigatiorKey.currentContext!).showSnackBar(SnackBar(
+        content: Text('Olha eu aqui ${notification.data['message']}')));
+  }
 }
 
-Future<void> _firebaseMessagingBaclgroundHandler(RemoteMessage message) async {
-  debugPrint('BACKGROUND MESSAGE');
+// Background
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  debugPrint('BACKGROUND MESSAGE: ${message.notification?.body}');
 }
 
 void _setPushToken(String? token) async {
@@ -95,6 +109,7 @@ class App extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Dev meetups',
       home: EventsScreen(),
+      navigatorKey: navigatiorKey,
     );
   }
 }
